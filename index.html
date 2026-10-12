@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#08091d">
+<title>สัญญาณจากดวงดาว ✦</title>
+<style>
+*{box-sizing:border-box}
+:root{--purple:#b7a5ff;--cyan:#8cecff;--panel:#11132ce8}
+body{margin:0;background:#050615;color:white;font-family:system-ui,Tahoma,sans-serif;min-height:100vh}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:-1}
+main{width:min(760px,100%);margin:auto;padding:15px 12px 40px}
+h1{text-align:center;font-size:clamp(25px,6vw,38px);margin:15px 0 5px}
+.subtitle{text-align:center;color:#c5c8ff;margin-bottom:20px}
+.panel{background:var(--panel);border:1px solid #a9a4ff55;border-radius:19px;padding:16px;margin:13px 0;box-shadow:0 0 24px #6556ff13;backdrop-filter:blur(12px)}
+h2{font-size:19px;margin:0 0 12px;color:#ded7ff}
+label{display:block;margin:11px 0 6px;color:#d8dbff;font-size:14px}
+input,select,textarea{width:100%;border:1px solid #7776b5;background:#0b0e26;color:white;border-radius:11px;padding:12px;font:inherit}
+input[type=range]{padding:5px;accent-color:#a99aff}
+input[type=file]{font-size:12px}
+button{border:0;border-radius:12px;padding:12px 14px;background:linear-gradient(135deg,#8b75ff,#586ce7);color:white;font:inherit;font-weight:700;cursor:pointer}
+button:active{transform:scale(.98)}
+button.secondary{background:#282a49;border:1px solid #7776b5}
+button.danger{background:#713b65}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1;min-width:0}
+.small{font-size:12px;color:#b8bbdf;line-height:1.7}
+.hidden{display:none!important}
+#app{display:none}
+#profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:12px 0}
+.profileBtn{background:#242343;border:1px solid #8b83d8;text-align:left;overflow-wrap:anywhere}
+.status{color:#9ff5d8;font-size:13px}
+.radioface{text-align:center;border:1px solid #7776b5;border-radius:16px;padding:16px;background:radial-gradient(ellipse,#313269,#101127 70%)}
+.frequency{font-size:clamp(28px,8vw,44px);font-weight:800;color:var(--cyan);letter-spacing:2px}
+.wave{height:30px;display:flex;justify-content:center;align-items:center;gap:4px}
+.wave i{width:4px;border-radius:8px;background:#8cecff;height:7px}
+.wave.on i{animation:pulse .55s ease-in-out infinite alternate}
+.wave i:nth-child(3n){animation-delay:.2s}
+.wave i:nth-child(2n){animation-delay:.35s}
+@keyframes pulse{to{height:28px;opacity:.5}}
+#chat{height:290px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:10px;background:#07091b99;border-radius:13px}
+.msg{max-width:88%;padding:10px 12px;border-radius:14px;overflow-wrap:anywhere;white-space:pre-wrap}
+.me{align-self:flex-end;background:#6454b8}
+.ai{align-self:flex-start;background:#202849;border:1px solid #6476b455}
+.msg small{display:block;color:#c4c7e7;font-size:10px;margin-bottom:4px}
+#cardPreview{position:relative;overflow:hidden;min-height:270px;border-radius:18px;padding:20px;text-align:center;background:#11162e;border:5px solid #b5a1ff}
+#cardBg{position:absolute;inset:-15px;background-position:center;background-size:cover;filter:blur(13px);opacity:.32}
+.cardContent{position:relative;z-index:1;text-shadow:0 2px 8px #000}
+#cardPet{max-width:100%;width:170px;height:145px;object-fit:cover;border-radius:14px;border:3px solid #fff9;background:#27274c}
+#cardTitle{font-size:22px;font-weight:800;margin:8px}
+#cardMessage{white-space:pre-wrap;overflow-wrap:anywhere}
+#cardDate{font-size:12px;margin-top:15px;color:#e1e0ff}
+footer{text-align:center;color:#9296c5;font-size:11px;margin-top:22px}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<main>
+<h1>✦ สัญญาณจากดวงดาว ✦</h1>
+<div class="subtitle">คลื่นความทรงจำที่ส่งผ่านห้วงอวกาศ 🌠</div>
+
+<section id="login" class="panel">
+<h2>🪐 เข้าสู่สถานีส่วนตัว</h2>
+<p class="small">ตั้งชื่อโปรไฟล์ใหม่ หรือเลือกชื่อเดิมเพื่อกลับไปดูประวัติของตัวเอง</p>
+<label for="username">ชื่อโปรไฟล์</label>
+<input id="username" maxlength="32" placeholder="ตั้งชื่อโปรไฟล์ของคุณ">
+<button id="enterBtn" style="width:100%;margin-top:10px">🚀 เข้าสู่สถานี</button>
+<h2 style="margin-top:22px">โปรไฟล์ในเครื่องนี้</h2>
+<div id="profiles"></div>
+<p class="small">ข้อมูลอยู่ในเบราว์เซอร์เครื่องนี้ ไม่ใช้ฐานข้อมูลออนไลน์ โปรไฟล์ไม่มีรหัสผ่าน ผู้ที่ใช้เครื่องเดียวกันอาจเปิดโปรไฟล์ของผู้อื่นได้</p>
+</section>
+
+<div id="app">
+<section class="panel">
+<div class="row" style="align-items:center">
+<div style="flex:2">
+<h2 style="margin-bottom:4px">👤 <span id="who"></span></h2>
+<div class="status">● สถานีส่วนตัว</div>
+</div>
+<button id="switchBtn" class="secondary">ออกจากสถานี</button>
+</div>
+</section>
+
+<section class="panel">
+<h2>📻 เครื่องรับสัญญาณ</h2>
+<div class="radioface">
+<div class="small">GALACTIC MEMORY RADIO</div>
+<div class="frequency"><span id="freqText">88.8</span> <small>MHz</small></div>
+<div class="wave" id="wave"></div>
+<div id="radioStatus" class="small">วิทยุปิดอยู่</div>
+</div>
+<label for="frequency">ปรับความถี่</label>
+<input id="frequency" type="range" min="70" max="108" step=".1" value="88.8">
+<div class="row">
+<button id="radioBtn">⏻ เปิดวิทยุ</button>
+<button id="staticBtn" class="secondary">〰 คลื่นรบกวน</button>
+</div>
+<p class="small">เสียงเป็นเอฟเฟกต์จำลอง ไม่มีเพลง และไม่ได้ติดต่อกับดวงดาวหรือผู้ที่เสียชีวิตจริง</p>
+</section>
+
+<section class="panel">
+<h2>🐾 ความทรงจำของสัตว์เลี้ยง</h2>
+<label for="petType">ชนิดสัตว์</label>
+<select id="petType">
+<option>สุนัข</option><option>แมว</option><option>กระต่าย</option>
+<option>นก</option><option>ปลา</option><option>หนูแฮมสเตอร์</option>
+<option>เต่า</option><option>หนูตะเภา</option><option>ม้า</option>
+<option>เม่นแคระ</option><option value="อื่น ๆ">อื่น ๆ</option>
+</select>
+<div id="customAnimalBox" class="hidden">
+<label for="customAnimal">ระบุชนิดสัตว์</label>
+<input id="customAnimal" maxlength="40" placeholder="เช่น กระแต">
+</div>
+<label for="petName">ชื่อสัตว์เลี้ยง</label>
+<input id="petName" maxlength="60" placeholder="ชื่อที่อยากระลึกถึง">
+<label for="firstMemory">ข้อความที่อยากฝากไว้</label>
+<textarea id="firstMemory" rows="3" maxlength="500" placeholder="เขียนความทรงจำของคุณ"></textarea>
+<button id="savePet" style="width:100%;margin-top:10px">💫 บันทึกข้อมูลสัตว์เลี้ยง</button>
+</section>
+
+<section class="panel">
+<h2>💬 แชตผ่านคลื่นวิทยุ</h2>
+<div id="chat"></div>
+<label for="message">ข้อความของคุณ</label>
+<textarea id="message" rows="2" maxlength="1000" placeholder="พิมพ์ข้อความที่อยากฝากไว้..."></textarea>
+<div class="row" style="margin-top:9px">
+<button id="sendBtn">ส่งสัญญาณ ✦</button>
+<button id="downloadChat" class="secondary">บันทึกประวัติ</button>
+</div>
+<p class="small">คำตอบเป็นข้อความจำลองจากระบบ ไม่ใช่คำตอบจริงจากสัตว์เลี้ยงหรือผู้ที่เสียชีวิตแล้ว</p>
+</section>
+
+<section class="panel">
+<h2>🌌 การ์ดความทรงจำ</h2>
+<label for="photo">เลือกรูปภาพ</label>
+<input id="photo" type="file" accept="image/*">
+<label for="cardText">ข้อความบนการ์ด</label>
+<textarea id="cardText" rows="2" maxlength="300" placeholder="ความทรงจำจะอยู่ในใจเสมอ"></textarea>
+<label for="frame">เลือกกรอบ</label>
+<select id="frame">
+<option value="#b5a1ff">ม่วงกาแล็กซี</option>
+<option value="#8cecff">ฟ้าดวงดาว</option>
+<option value="#ffc6ed">ชมพูเนบิวลา</option>
+<option value="#f6d889">ทองแห่งความทรงจำ</option>
+<option value="#ffffff">แสงจันทร์</option>
+</select>
+<div id="cardPreview" style="margin-top:12px">
+<div id="cardBg"></div>
+<div class="cardContent">
+<div>✦ A MEMORY AMONG THE STARS ✦</div>
+<img id="cardPet" alt="รูปสัตว์เลี้ยง" style="display:none">
+<div id="cardTitle">ความทรงจำของเรา</div>
+<div id="cardMessage">ความทรงจำจะยังคงอยู่เสมอ ✨</div>
+<div id="cardDate"></div>
+</div>
+</div>
+<div class="row" style="margin-top:12px">
+<button id="previewCard">อัปเดตการ์ด</button>
+<button id="exportCard" class="secondary">บันทึกการ์ด PNG</button>
+</div>
+<p class="small">รูปภาพและข้อมูลจะถูกบันทึกในเบราว์เซอร์ของเครื่องนี้ หากพื้นที่เต็มอาจต้องเลือกรูปใหม่</p>
+</section>
+
+<section class="panel">
+<h2>🗂️ จัดการข้อมูล</h2>
+<button id="clearChat" class="secondary" style="width:100%">ล้างประวัติแชตโปรไฟล์นี้</button>
+<button id="deleteProfile" class="danger" style="width:100%;margin-top:9px">ลบโปรไฟล์นี้ทั้งหมด</button>
+</section>
+</div>
+<footer>✦ สัญญาณจากดวงดาว · ความทรงจำส่วนตัวในเครื่อง ✦</footer>
+</main>
+
+<script>
+/* พื้นหลังดาวตก */
+const sky=document.getElementById('sky'),ctx=sky.getContext('2d');
+let stars=[],shooters=[];
+function resize(){
+ sky.width=innerWidth*devicePixelRatio;
+ sky.height=innerHeight*devicePixelRatio;
+ ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+ stars=Array.from({length:100},()=>({
+ x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+ r:Math.random()*1.5+.3,a:Math.random()*.8+.2
+ }));
+}
+function drawSky(){
+ ctx.clearRect(0,0,innerWidth,innerHeight);
+ const g=ctx.createLinearGradient(0,0,innerWidth,innerHeight);
+ g.addColorStop(0,'#090b25');g.addColorStop(.5,'#11102c');g.addColorStop(1,'#050615');
+ ctx.fillStyle=g;ctx.fillRect(0,0,innerWidth,innerHeight);
+ for(const s of stars){
+  ctx.globalAlpha=s.a*(.65+Math.sin(Date.now()/700+s.x)*.25);
+  ctx.fillStyle='#e6e8ff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
+ }
+ ctx.globalAlpha=1;
+ if(Math.random()<.025)shooters.push({
+ x:Math.random()*innerWidth,y:Math.random()*innerHeight*.5,
+ v:5+Math.random()*5,l:40+Math.random()*70
+ });
+ shooters=shooters.filter(s=>s.x<innerWidth+100&&s.y<innerHeight+100);
+ for(const s of shooters){
+  const grad=ctx.createLinearGradient(s.x,s.y,s.x-s.l,s.y-s.l*.5);
+  grad.addColorStop(0,'#fff');grad.addColorStop(1,'transparent');
+  ctx.strokeStyle=grad;ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.l,s.y-s.l*.5);ctx.stroke();
+  s.x+=s.v;s.y+=s.v*.5;
+ }
+ requestAnimationFrame(drawSky);
+}
+addEventListener('resize',resize);resize();drawSky();
+
+/* ระบบโปรไฟล์แยกข้อมูล */
+const $=id=>document.getElementById(id);
+const PREFIX='starRadioUser:';
+const LISTKEY='starRadioProfiles';
+let current='',data={},photoData='';
+let replyTimer=null;
+
+function safeName(n){return n.trim().replace(/\s+/g,' ').slice(0,32)}
+function userKey(n){return PREFIX+encodeURIComponent(n.toLocaleLowerCase())}
+function readList(){
+ try{return JSON.parse(localStorage.getItem(LISTKEY)||'[]')}
+ catch(e){return []}
+}
+function writeList(a){localStorage.setItem(LISTKEY,JSON.stringify(a))}
+function showProfiles(){
+ $('profiles').innerHTML='';
+ readList().forEach(name=>{
+  const b=document.createElement('button');
+  b.className='profileBtn';b.textContent='✦ '+name;
+  b.onclick=()=>loadUser(name);
+  $('profiles').appendChild(b);
+ });
+}
+function loadUser(name){
+ stopAllRadioAudio();
+ current=name;
+ try{data=JSON.parse(localStorage.getItem(userKey(name))||'{}')}
+ catch(e){data={}}
+ $('who').textContent=name;
+ $('login').style.display='none';$('app').style.display='block';
+ $('petType').value=data.petType||'สุนัข';
+ $('customAnimal').value=data.customAnimal||'';
+ $('petName').value=data.petName||'';
+ $('firstMemory').value=data.firstMemory||'';
+ $('frequency').value=data.frequency||88.8;
+ $('freqText').textContent=Number($('frequency').value).toFixed(1);
+ $('cardText').value=data.cardText||'ความทรงจำจะยังคงอยู่เสมอ ✨';
+ $('frame').value=data.frame||'#b5a1ff';
+ photoData=data.photoData||'';
+ $('cardPet').src=photoData;
+ $('cardPet').style.display=photoData?'inline-block':'none';
+ updateOther();renderChat();updateCard();
+}
+function saveUser(){
+ if(!current)return;
+ data.petType=$('petType').value;
+ data.customAnimal=$('customAnimal').value;
+ data.petName=$('petName').value;
+ data.firstMemory=$('firstMemory').value;
+ data.frequency=$('frequency').value;
+ data.cardText=$('cardText').value;
+ data.frame=$('frame').value;
+ data.photoData=photoData;
+ try{localStorage.setItem(userKey(current),JSON.stringify(data))}
+ catch(e){alert('พื้นที่บันทึกเต็ม ลองเลือกรูปที่เล็กลง')}
+}
+$('enterBtn').onclick=()=>{
+ const name=safeName($('username').value);
+ if(!name){alert('กรุณาพิมพ์ชื่อโปรไฟล์');return}
+ let list=readList();
+ const existing=list.find(n=>n.toLocaleLowerCase()===name.toLocaleLowerCase());
+ if(!existing){list.push(name);writeList(list)}
+ loadUser(existing||name);showProfiles();
+};
+$('username').addEventListener('keydown',e=>{
+ if(e.key==='Enter')$('enterBtn').click();
+});
+$('switchBtn').onclick=()=>{
+ stopAllRadioAudio();saveUser();
+ current='';data={};photoData='';
+ $('app').style.display='none';$('login').style.display='block';
+ $('username').value='';showProfiles();
+};
+$('deleteProfile').onclick=()=>{
+ if(!confirm('ลบข้อมูลทั้งหมดของโปรไฟล์ '+current+' ใช่ไหม?'))return;
+ stopAllRadioAudio();
+ localStorage.removeItem(userKey(current));
+ writeList(readList().filter(n=>n.toLocaleLowerCase()!==current.toLocaleLowerCase()));
+ current='';data={};photoData='';
+ $('app').style.display='none';$('login').style.display='block';
+ $('username').value='';showProfiles();
+};
+showProfiles();
+
+/* สัตว์เลี้ยง */
+function updateOther(){
+ $('customAnimalBox').classList.toggle('hidden',$('petType').value!=='อื่น ๆ');
+}
+$('petType').onchange=()=>{updateOther();saveUser()};
+['customAnimal','petName','firstMemory','cardText','frame'].forEach(id=>{
+ $(id).addEventListener('input',()=>{saveUser();updateCard()});
+ $(id).addEventListener('change',()=>{saveUser();updateCard()});
+});
+$('savePet').onclick=()=>{saveUser();alert('บันทึกข้อมูลของโปรไฟล์นี้แล้ว ✨')};
+
+/* วิทยุและระบบหยุดเสียงแบบสมบูรณ์ */
+let audio=null,radioOn=false,staticOn=false,noiseNode=null,noiseGain=null;
+
+function audioReady(){
+ if(!audio||audio.state==='closed')audio=new (window.AudioContext||window.webkitAudioContext)();
+ if(audio.state==='suspended')audio.resume();
+}
+function beep(freq,duration=.08,volume=.035){
+ if(!audio||audio.state==='closed')return;
+ const o=audio.createOscillator(),g=audio.createGain();
+ o.type='sine';o.frequency.value=freq;g.gain.value=volume;
+ o.connect(g);g.connect(audio.destination);o.start();
+ g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
+ o.stop(audio.currentTime+duration);
+}
+function startNoise(){
+ if(!audio||audio.state==='closed'||noiseNode)return;
+ const buffer=audio.createBuffer(1,audio.sampleRate*2,audio.sampleRate);
+ const d=buffer.getChannelData(0);
+ for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+ noiseNode=audio.createBufferSource();noiseNode.buffer=buffer;noiseNode.loop=true;
+ noiseGain=audio.createGain();noiseGain.gain.value=.018;
+ noiseNode.connect(noiseGain);noiseGain.connect(audio.destination);noiseNode.start();
+}
+function stopNoise(){
+ if(noiseNode){try{noiseNode.stop()}catch(e){}try{noiseNode.disconnect()}catch(e){}}
+ if(noiseGain){try{noiseGain.disconnect()}catch(e){}}
+ noiseNode=null;noiseGain=null;
+}
+function stopAllRadioAudio(){
+ radioOn=false;staticOn=false;
+ stopNoise();
+ if(audio){
+  const oldAudio=audio;audio=null;
+  try{oldAudio.close()}catch(e){}
+ }
+ $('radioBtn').textContent='⏻ เปิดวิทยุ';
+ $('staticBtn').textContent='〰 คลื่นรบกวน';
+ $('radioStatus').textContent='วิทยุปิดอยู่';
+ $('wave').classList.remove('on');
+}
+$('radioBtn').onclick=()=>{
+ if(!radioOn){
+  audioReady();radioOn=true;
+  $('radioBtn').textContent='⏻ ปิดวิทยุ';
+  $('radioStatus').textContent='รับสัญญาณที่ '+Number($('frequency').value).toFixed(1)+' MHz';
+  $('wave').classList.add('on');beep(650,.12);
+  if(staticOn)startNoise();
+ }else stopAllRadioAudio();
+};
+$('staticBtn').onclick=()=>{
+ if(!radioOn){alert('กรุณาเปิดวิทยุก่อน');return}
+ audioReady();staticOn=!staticOn;
+ $('staticBtn').textContent=staticOn?'〰 ปิดคลื่นรบกวน':'〰 คลื่นรบกวน';
+ if(staticOn)startNoise();else stopNoise();
+ if(staticOn)beep(180,.15);
+};
+$('frequency').oninput=()=>{
+ $('freqText').textContent=Number($('frequency').value).toFixed(1);
+ $('radioStatus').textContent=radioOn?'รับสัญญาณที่ '+Number($('frequency').value).toFixed(1)+' MHz':'วิทยุปิดอยู่';
+ saveUser();
+};
+
+/* หยุดเสียงเมื่อออกจากเว็บ/สลับแอป/ปิดหน้าจอ */
+window.addEventListener('pagehide',stopAllRadioAudio);
+window.addEventListener('beforeunload',stopAllRadioAudio);
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden)stopAllRadioAudio();
+});
+
+/* แชตจำลอง */
+function renderChat(){
+ $('chat').innerHTML='';
+ (data.messages||[]).forEach(m=>addBubble(m.who,m.text,m.time,false));
+ $('chat').scrollTop=$('chat').scrollHeight;
+}
+function addBubble(who,text,time,scroll=true){
+ const div=document.createElement('div');
+ div.className='msg '+(who==='คุณ'?'me':'ai');
+ const small=document.createElement('small');small.textContent=who+' · '+time;
+ const body=document.createElement('div');body.textContent=text;
+ div.append(small,body);$('chat').appendChild(div);
+ if(scroll)$('chat').scrollTop=$('chat').scrollHeight;
+}
+function nowTime(){return new Date().toLocaleString('th-TH')}
+function animalName(){
+ return $('petType').value==='อื่น ๆ'?($('customAnimal').value.trim()||'สัตว์เลี้ยง'):$('petType').value;
+}
+function simulatedReply(){
+ const pet=$('petName').value.trim()||'เพื่อนตัวน้อย';
+ const kind=animalName();
+ const replies=[
+ 'ระบบได้รับข้อความของคุณแล้ว ✦ ลองนึกถึงช่วงเวลาดี ๆ ที่คุณมีร่วมกับ'+pet+'นะ',
+ 'คลื่นวิทยุจำลองส่งเสียงซ่าเบา ๆ ... ความทรงจำเกี่ยวกับ'+pet+'ยังมีความหมายสำหรับคุณเสมอ',
+ 'สัญญาณจำลอง: “ขอบคุณที่เก็บช่วงเวลาดี ๆ ไว้ในใจ” ข้อความนี้สร้างโดยระบบ ไม่ใช่ข้อความจริงจาก'+kind,
+ 'แสงดาวกะพริบผ่านหน้าจอ ✨ คุณอยากเล่าเรื่องไหนเกี่ยวกับ'+pet+'ให้ตัวเองจดจำอีกบ้าง?',
+ 'ไม่มีใครตอบกลับมาจากดวงดาวจริง ๆ แต่คุณสามารถใช้พื้นที่นี้เขียนสิ่งที่อยากบอก'+pet+'ได้เสมอ'
+ ];
+ return replies[Math.floor(Math.random()*replies.length)];
+}
+function send(){
+ const text=$('message').value.trim();
+ if(!text||!current)return;
+ if(!data.messages)data.messages=[];
+ const owner=current,t=nowTime();
+ data.messages.push({who:'คุณ',text,time:t});
+ addBubble('คุณ',text,t);$('message').value='';
+ if(radioOn){audioReady();beep(720,.07);if(staticOn)startNoise()}
+ const reply=simulatedReply();
+ if(replyTimer)clearTimeout(replyTimer);
+ replyTimer=setTimeout(()=>{
+  replyTimer=null;
+  if(current!==owner)return;
+  const rt=nowTime();
+  data.messages.push({who:'สัญญาณจำลอง',text:reply,time:rt});
+  addBubble('สัญญาณจำลอง',reply,rt);saveUser();
+ },500);
+ saveUser();
+}
+$('sendBtn').onclick=send;
+$('message').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}
+});
+$('clearChat').onclick=()=>{
+ if(!confirm('ล้างเฉพาะประวัติแชตของโปรไฟล์นี้หรือไม่?'))return;
+ data.messages=[];saveUser();renderChat();
+};
+function downloadBlob(name,content,type='text/plain;charset=utf-8'){
+ const blob=new Blob([content],{type}),url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download=name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('downloadChat').onclick=()=>{
+ const lines=(data.messages||[]).map(m=>'['+m.time+'] '+m.who+': '+m.text).join('\n');
+ downloadBlob('ประวัติวิทยุ-'+current+'.txt',lines||'ยังไม่มีประวัติแชต');
+};
+
+/* การ์ดความทรงจำ */
+$('photo').onchange=e=>{
+ const f=e.target.files&&e.target.files[0];if(!f)return;
+ if(f.size>12*1024*1024){alert('รูปใหญ่เกินไป กรุณาเลือกรูปไม่เกิน 12 MB');e.target.value='';return}
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const im=new Image();
+  im.onload=()=>{
+   const c=document.createElement('canvas'),max=650;
+   const scale=Math.min(1,max/Math.max(im.width,im.height));
+   c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);
+   c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+   photoData=c.toDataURL('image/jpeg',.68);
+   $('cardPet').src=photoData;$('cardPet').style.display='inline-block';
+   $('cardBg').style.backgroundImage='url("'+photoData+'")';
+   saveUser();updateCard();
+  };
+  im.src=reader.result;
+ };
+ reader.readAsDataURL(f);
+};
+function updateCard(){
+ $('cardTitle').textContent=$('petName').value.trim()||'ความทรงจำของเรา';
+ $('cardMessage').textContent=$('cardText').value||'ความทรงจำจะยังคงอยู่เสมอ ✨';
+ $('cardDate').textContent='✦ '+new Date().toLocaleDateString('th-TH')+' ✦';
+ $('cardPreview').style.borderColor=$('frame').value;
+ $('cardPet').style.display=photoData?'inline-block':'none';
+ $('cardBg').style.backgroundImage=photoData?'url("'+photoD
